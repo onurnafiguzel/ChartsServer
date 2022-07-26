@@ -5,6 +5,7 @@ using ChartsServer.Subscription.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
+//builder.Services.AddDbContext<SatisDbContext>();
 builder.Services.AddCors(option => option.AddDefaultPolicy(policy =>
 {
     policy.AllowCredentials()
