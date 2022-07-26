@@ -1,4 +1,6 @@
-﻿using TableDependency.SqlClient;
+﻿using ChartsServer.Hubs;
+using Microsoft.AspNetCore.SignalR;
+using TableDependency.SqlClient;
 
 namespace ChartsServer.Subscription
 {
@@ -10,10 +12,12 @@ namespace ChartsServer.Subscription
     public class DatabaseSubscription<T> : IDatabaseSubscription where T : class, new()
     {
         IConfiguration configuration;
+        IHubContext<SatisHub> hubContext;
 
-        public DatabaseSubscription(IConfiguration configuration)
+        public DatabaseSubscription(IConfiguration configuration, IHubContext<SatisHub> hubContext)
         {
             this.configuration = configuration;
+            this.hubContext = hubContext;
         }
 
         SqlTableDependency<T> tableDependency;
@@ -21,8 +25,14 @@ namespace ChartsServer.Subscription
         public void Configure(string tableName)
         {
             tableDependency = new SqlTableDependency<T>(configuration.GetConnectionString("SQL"), tableName);
-            tableDependency.OnChanged += TableDependency_OnChanged;
-            tableDependency.OnError += TableDependency_OnError;
+            tableDependency.OnChanged += async (o, e) =>
+            {
+                await hubContext.Clients.All.SendAsync("receiveMessage", "Deneme");
+            };
+            tableDependency.OnError += (o, e) =>
+            {
+
+            };
             tableDependency.Start();
         }
 
@@ -31,15 +41,6 @@ namespace ChartsServer.Subscription
             tableDependency.Stop();
         }
 
-        private void TableDependency_OnChanged(object sender, TableDependency.SqlClient.Base.EventArgs.RecordChangedEventArgs<T> e)
-        {
-            throw new NotImplementedException();
-        }
 
-
-        private void TableDependency_OnError(object sender, TableDependency.SqlClient.Base.EventArgs.ErrorEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
