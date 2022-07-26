@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace ChartsServer.Models
 {
+    // Veritabanında bu komut çalıştırıdlı. -> ALTER DATABASE SatisDb SET Enable_Broker
     public partial class SatisDbContext : DbContext
     {
         public SatisDbContext()
